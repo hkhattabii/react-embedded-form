@@ -1,61 +1,98 @@
-import React, {useRef, CSSProperties, FC, RefObject, FormEvent} from "react";
-import {changeKeyValue} from './utils'
+import React, { useRef, CSSProperties, FC, HTMLAttributes, RefObject } from "react"
 
-type FieldType = "text" | "number" | "any"
+
 
 type FieldProps<T> = {
   name: keyof T
-  refParent?: keyof T
-} & React.HTMLAttributes<HTMLInputElement>
-
-
-type FieldGroupItem<T> = {
-  parent: T
-  item: keyof T
-}
+} & HTMLAttributes<HTMLInputElement>
 
 type FormProps<T> = {
-  onSubmit: (data: FormData<T>) => void
+  onSubmit: (data: FieldData<T>) => void
   style?: CSSProperties
 }
 
-type SubField<T> = {
-[k in keyof T]: Field<T>
+type FieldGroupItemProps<U> = {
+  name: keyof U
+}  & HTMLAttributes<HTMLInputElement>
+
+type Form<T> = {
+  [K in keyof T]: T[K]
 }
 
-type Field<T> = {
-  [k in keyof T]: {
-    type: FieldType
-    ref: RefObject<HTMLInputElement>
-  } 
+export type Fields<T> = {
+  [K in keyof T]: Field<T, keyof T>
 }
 
-type FormData<T> = {
-  [K in keyof T]: any
+type Field<T, K extends keyof T> = {
+  name: K,
+  type: FieldType
+  value?: any | undefined
+  ref?: RefObject<HTMLInputElement> | undefined
+  children?: Fields<T> | undefined
+}
+
+type FieldType = "text" | "number" | "fieldgroup" | "any"
+
+type FieldDataWithRoot<T> = {
+  [K in keyof T]: FieldData<T>
+}
+type FieldData<T> = {
+  [ K in keyof T] : any
 }
 
 
-
-function initField<T>(form: T, rootName?: string | undefined): Field<T> | SubField<T> {
+function initField<T>(form: any): Fields<T> {
   const keys = Object.keys(form) as Array<keyof T>
-  const arr: Array<Field<T> | SubField<T>> = keys.map((key) => {
+  const arr: Array<Fields<T>> = keys.map(key => {
+    const field = {
+      [key]: {
+        name: key,
+        type: typeof form[key] === "string" ? "text" : typeof form[key] === "number" ? "number" : "fieldgroup",
+      } 
+    } as Fields<T>
     if (typeof form[key] === "object") {
-      const subField = initField(form[key] as any, key.toString())
-      return subField
+      field[key].children = initField<T>(form[key])
+    } else {
+      field[key].value = form[key]
+      field[key].ref = useRef<HTMLInputElement>(null)
     }
-    const type: FieldType = typeof form[key] === "string" ? "text" : typeof form[key] === "number" ? "number" : "any"
-    const ref: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null)
-    return { [key]: {
-      type: type,
-      ref: ref
-    }} as Field<T> 
+    return field
   })
-  const fields: Field<T> = Object.assign({}, ...arr)
-  if (rootName) {
-    const fieldWithRoot: SubField<T> = {[rootName]: {...fields}} as SubField<T>
-    return fieldWithRoot
-  }
+
+  const fields: Fields<T> = Object.assign({}, ...arr) 
+
   return fields
+}
+
+
+function getItem<T, U>(fields: Fields<T> | undefined, name: keyof U | keyof T, root?: string | undefined): Field<T, keyof T> | undefined {
+  if (!fields) {
+    return undefined
+  }
+
+  const keys = Object.keys(fields) as Array<keyof T>
+  var value: Field<T, keyof T> | undefined;
+
+  keys.some(key => {
+    const field = fields[key]
+    if (field.name === name && root === undefined) {
+      value = field
+      return true
+    }
+    if (field.children) {
+      if (field.name === root) {
+        value = getItem(field.children, name, undefined)
+        return value !== undefined
+      } else {
+        value = getItem(field.children, name, root)
+        return value !== undefined
+      }
+
+    }
+    return false
+  })
+
+  return value
 }
 
 
@@ -72,51 +109,59 @@ function formatValue(value: string | undefined, type: FieldType): string | numbe
 }
 
 
-function createFormdata<T>(fields: Field<T>) {
-  /*
-  return changeKeyValue<Field<T>, FormData<T>, string | number | undefined>(fields, (key) => {
-    const value: string | undefined = fields[key].ref.current?.value
-    const type = fields[key].type
-    return formatValue(value, type)
+function toData<T>(fields: Fields<T>, root?: string | undefined): FieldData<T> {
+  const keys = Object.keys(fields) as Array<keyof T>
+  const arr: Array<FieldData<T>> = keys.map(key => {
+    const field = fields[key]
+    if (field.type === "fieldgroup") {
+      if (field.children) return toData(field.children, field.name.toString())
+    }
+    const value = formatValue(field.ref?.current?.value, field.type)
+    return { [key]: value } as FieldData<T>
   })
-  */
+
+
+
+  const data: FieldData<T> = Object.assign({}, ...arr)
+  if (root) {
+    const dataWithRoot = {[root]: {...data}} as FieldDataWithRoot<T>
+    return dataWithRoot
+  }
+
+
+  return data
 }
 
 
 
-
-export default function useForm<T>(form: T) {
-  const fields = initField(form) as Field<T>
-
-  console.log(fields)
+export default function useForm<T extends Form<T>>(form: T) {
+  const fields: Fields<T> = initField(form)
 
   const Field: FC<FieldProps<T>> = ({name, placeholder}) => {
-    return <input placeholder={placeholder}  />
+    const field = getItem(fields,name, undefined)
+    return <input defaultValue={field?.value}  placeholder={placeholder} ref={field?.ref}  />
   }
 
-  const Form: FC<FormProps<T>> = ({onSubmit, style, children}) => {
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const Form: FC<FormProps<T>> = ({children, onSubmit, style}) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      console.log(fields)
-      /*
-      const data = createFormdata(fields)
+      const data = toData(fields)
       onSubmit(data)
-      */
     }
     return <form onSubmit={handleSubmit} style={style}>{children}</form>
   }
 
 
-  return {Form, Field}
+   function useFieldGroup <U>(groupName: string) {
+    const FieldGroupItem: FC<FieldGroupItemProps<U>> = ({name, placeholder}) => {
+      const field = getItem(fields, name, groupName)
+      return <input defaultValue={field?.value}  placeholder={placeholder} ref={field?.ref}  />
+    }
 
+    return FieldGroupItem
+  }
+
+
+  return {Form, Field, useFieldGroup}
 }
-
-
-
-export function FieldGroupItem<T>({parent, item}: FieldGroupItem<T>) {
-  const {Field} = useForm(parent)
-  return <Field name={item} placeholder={item.toString()}  />
-
-}
-
