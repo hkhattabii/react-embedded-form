@@ -4,12 +4,12 @@ import useForm  from "./hooks/useForm";
 
 
 const form: Form = {
-  name: "my-name",
-  surname: "My-surname",
+  name: "My-Name",
+  surname: "",
   address: {
     street: {
       name: "my-street",
-      people: 12
+      people: 0
     },
     city: "my-city",
   },
@@ -44,10 +44,8 @@ interface Product {
 
 
 export default function App() {
-  const {Form, Field, useFieldGroup} = useForm(form)
-  const ProductField = useFieldGroup<Product>("product")
-  const AddressField = useFieldGroup<Address>("address")
-  const StreetField = useFieldGroup<Street>("street")
+  const {Form, Input, Select, useFieldGroup} = useForm(form)
+  const {InputGroup, SelectGroup} = useFieldGroup<Product>("product")
   
 
   const onSubmit = (data: any) => {
@@ -56,14 +54,11 @@ export default function App() {
 
   return (
     <Form onSubmit={onSubmit} style={formStyle}>
-      <Field name="name" placeholder="name" />
-      <Field name="surname" placeholder="surname" />
-      <StreetField name="name" placeholder="street name" />
-      <StreetField name="people" placeholder="people number" />
-      <AddressField name="city" placeholder="city" />
-      <ProductField name="name" placeholder="Product name" />
-      <ProductField name="price" placeholder="Price of the product" />
-      <button type="submit">Validate</button>
+      <Input name="name" placeholder={form.name} />
+      <Select name="surname" placeholder="surname" items={["Khattabi", "Ben Haddou", "Chillah"]} />
+      <InputGroup name="name" placeholder={form.order.product.name} />
+      <SelectGroup name="price" placeholder="price" items={["100€", "200€", 300]}  />
+      <button type="submit">validate</button>
     </Form>
   );
 }

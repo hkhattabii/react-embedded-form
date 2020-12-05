@@ -13,7 +13,7 @@ export default function initField<T>(form: any): ReformFields<T> {
         field[key].children = initField<T>(form[key])
       } else {
         field[key].value = form[key]
-        field[key].ref = useRef<HTMLInputElement>(null)
+        field[key].ref = useRef<unknown>(null)
       }
       return field
     })
