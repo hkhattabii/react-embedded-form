@@ -1,39 +1,44 @@
-import {HTMLAttributes, HTMLInputElement, CSSProperties, RefObject} from 'react'
+import {
+  HTMLAttributes,
+  HTMLInputElement,
+  CSSProperties,
+  RefObject,
+} from "react";
 
-export type FieldProps<T> = {
-  name: keyof T;
-} & HTMLAttributes<HTMLInputElement>;
+declare global {
+  export type FieldProps<T> = {
+    name: keyof T;
+  } & HTMLAttributes<HTMLInputElement>;
 
-export type FormProps<T> = {
-  onSubmit: (data: FieldData<T>) => void;
-  style?: CSSProperties;
-};
+  export type FormProps<T> = {
+    onSubmit: (data: ReformData<T>) => void;
+    style?: CSSProperties;
+  };
 
-export type FieldGroupItemProps<U> = {
-  name: keyof U;
-} & HTMLAttributes<HTMLInputElement>;
+  export type FieldGroupItemProps<U> = FieldProps<U>;
 
-export type Reform<T> = {
-  [K in keyof T]: T[K];
-};
+  export type Reform<T> = {
+    [K in keyof T]: T[K];
+  };
 
-export type ReformFields<T> = {
-  [K in keyof T]: Field<T, keyof T>;
-};
+  export type ReformFields<T> = {
+    [K in keyof T]: ReformField<T, keyof T>;
+  };
 
-export type ReformField<T, K extends keyof T> = {
-  name: K;
-  type: ReformFieldType;
-  value?: any | undefined;
-  ref?: RefObject<HTMLInputElement> | undefined;
-  children?: Fields<T> | undefined;
-};
+  export type ReformField<T, K extends keyof T> = {
+    name: K;
+    type: ReformFieldType;
+    value?: any | undefined;
+    ref?: RefObject<HTMLInputElement> | undefined;
+    children?: ReformFields<T> | undefined;
+  };
 
-export type ReformFieldType = "text" | "number" | "fieldgroup" | "any";
+  export type ReformFieldType = "text" | "number" | "any";
 
-export type ReformDataWithParent<T> = {
-  [K in keyof T]: FieldData<T>;
-};
-export type ReformData<T> = {
-  [K in keyof T]: any;
-};
+  export type ReformDataWithParent<T> = {
+    [K in keyof T]: ReformData<T>;
+  };
+  export type ReformData<T> = {
+    [K in keyof T]: any;
+  };
+}

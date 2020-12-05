@@ -1,4 +1,4 @@
-import { ReformField, ReformFields } from "../types";
+
 
 export default function getField<T, U>(fields: ReformFields<T> | undefined, name: keyof U | keyof T, root?: string | undefined): ReformField<T, keyof T> | undefined {
     if (!fields) {

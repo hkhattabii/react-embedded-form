@@ -1,8 +1,5 @@
 import React, { FC } from "react"
-import { Reform, FieldProps, FormProps, FieldGroupItemProps,ReformFields} from './types'
 import { getField, initField, toData } from "./utils"
-
-
 
 
 

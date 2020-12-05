@@ -1,5 +1,4 @@
 import { useRef } from 'react'
-import { ReformFields } from "../types"
 
 export default function initField<T>(form: any): ReformFields<T> {
     const keys = Object.keys(form) as Array<keyof T>

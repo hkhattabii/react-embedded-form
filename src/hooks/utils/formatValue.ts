@@ -1,7 +1,7 @@
-import { ReformFieldType } from "../types"
 
 export default function formatValue(value: string | undefined, type: ReformFieldType): string | number | undefined {
     if (!value) return value
+    
     switch(type) {
       case "text": return value
       case "number": 
