@@ -1,21 +1,30 @@
-import {
-  HTMLAttributes,
-  HTMLInputElement,
-  CSSProperties,
-  RefObject,
-} from "react";
+import React, { HTMLAttributes, RefObject} from "react";
 
 declare global {
-  export type FieldProps<T> = {
-    name: keyof T;
-  } & HTMLAttributes<HTMLInputElement>;
+
 
   export type FormProps<T> = {
     onSubmit: (data: ReformData<T>) => void;
-    style?: CSSProperties;
+    style?: React.CSSProperties;
   };
 
-  export type FieldGroupItemProps<U> = FieldProps<U>;
+  
+  export type InputProps<T> = {
+    name: keyof T;
+    field?: ReformField<T, keyof T>
+  } & HTMLAttributes<HTMLInputElement>
+  
+  export type InputGroupProps<U> = InputProps<U>
+
+  export type SelectProps<T> = {
+    name: keyof T
+    items: Array<string | number>
+    field?: ReformField<T>
+  } & HTMLAttributes<HTMLSelectElement>
+
+  export type SelectGroupProps<U> = SelectProps<U>
+
+
 
   export type Reform<T> = {
     [K in keyof T]: T[K];
@@ -29,7 +38,7 @@ declare global {
     name: K;
     type: ReformFieldType;
     value?: any | undefined;
-    ref?: RefObject<HTMLInputElement> | undefined;
+    ref?: RefObject<any> | undefined;
     children?: ReformFields<T> | undefined;
   };
 
