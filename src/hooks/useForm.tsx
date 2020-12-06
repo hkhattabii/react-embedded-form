@@ -27,6 +27,7 @@ export default function useForm<T extends Reform<T>>(form: T) {
 
   const Select: FC<SelectProps<T>> = ({name, items}) => {
     const field = getField(fields,name, undefined)
+    console.log("FIELD : ", field)
     return <select ref={field?.ref}>
       {
         items.map(item => <option key={item} value={item}>{item}</option>)

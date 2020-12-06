@@ -21,7 +21,7 @@ const form: Form = {
   }
 }
 interface Form {
-  name: string,
+  name: string | string,
   surname: string,
   address: Address,
   order: Order

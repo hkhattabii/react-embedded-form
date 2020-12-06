@@ -42,6 +42,7 @@ export default function toData<T>(fields: ReformFields<T>, root?: string | undef
       }
     
       const value = formatValue(field.ref?.current?.value, field.type)
+      console.log(value)
       return { [key]: value } as ReformData<T>
     })
   
