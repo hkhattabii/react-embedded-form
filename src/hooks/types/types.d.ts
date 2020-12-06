@@ -11,7 +11,6 @@ declare global {
   
   export type InputProps<T> = {
     name: keyof T;
-    field?: ReformField<T, keyof T>
   } & HTMLAttributes<HTMLInputElement>
   
   export type InputGroupProps<U> = InputProps<U>
@@ -19,12 +18,22 @@ declare global {
   export type SelectProps<T> = {
     name: keyof T
     items: Array<string | number>
-    field?: ReformField<T>
   } & HTMLAttributes<HTMLSelectElement>
 
   export type SelectGroupProps<U> = SelectProps<U>
+  
+  export type RadioProps<T> = {
+    name: keyof T
+    items: string[]
+  } & HTMLAttributes<HTMLInputElement>
+
+  export type CheckboxProps<T> = {
+    name: keyof T
+    items: string[]
+  } & HTMLAttributes<HTMLInputElement>
 
 
+  export type CheckboxGroupProps<U> = CheckboxProps<U>
 
   export type Reform<T> = {
     [K in keyof T]: T[K];
@@ -39,10 +48,12 @@ declare global {
     type: ReformFieldType;
     value?: any | undefined;
     ref?: RefObject<any> | undefined;
+    refs?: Array<RefObject<any> | undefined>
     children?: ReformFields<T> | undefined;
   };
 
-  export type ReformFieldType = "text" | "number" | "any";
+
+  export type ReformFieldType = "text" | "number" | "any" | "fieldgroup" | array;
 
   export type ReformDataWithParent<T> = {
     [K in keyof T]: ReformData<T>;

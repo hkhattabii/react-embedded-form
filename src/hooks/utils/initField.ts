@@ -6,10 +6,10 @@ export default function initField<T>(form: any): ReformFields<T> {
       const field = {
         [key]: {
           name: key,
-          type: typeof form[key] === "string" ? "text" : typeof form[key] === "number" ? "number" : "fieldgroup",
+          type: typeof form[key] === "string" ? "text" : typeof form[key] === "number" ? "number" : Array.isArray(form[key]) ? "array" : "fieldgroup"
         } 
       } as ReformFields<T>
-      if (typeof form[key] === "object") {
+      if (field[key].type === "fieldgroup") {
         field[key].children = initField<T>(form[key])
       } else {
         field[key].value = form[key]

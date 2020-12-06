@@ -4,7 +4,9 @@ import { getField, initField, toData } from "./utils"
 
 
 export default function useForm<T extends Reform<T>>(form: T) {
-  let fields: ReformFields<T> = initField(form)
+  const fields: ReformFields<T> = initField(form)
+
+  console.log(fields)
 
 
   const Form: FC<FormProps<T>> = ({children, onSubmit, style}) => {
@@ -18,7 +20,7 @@ export default function useForm<T extends Reform<T>>(form: T) {
   }
 
 
-  const Input: FC<InputProps<T>> = ({name, placeholder, ...props}) => {
+  const Input: FC<InputProps<T>> = ({name, placeholder}) => {
     const field = getField(fields,name, undefined)    
     return <input defaultValue={field?.value}  placeholder={placeholder} ref={field?.ref} />
   }
@@ -31,6 +33,41 @@ export default function useForm<T extends Reform<T>>(form: T) {
       }
     </select>
   }
+
+  const Radio: FC<RadioProps<T>> = ({name, items}) => {
+    const field = getField(fields, name, undefined)
+    if (!field) return <></>
+    return <div ref={field.ref} id={`root-radios-${name}`}>
+      {
+
+        items.map(item => (
+          <div key={item}>
+            <input  type="radio" id={item} name={name.toString()} value={item}/>
+            <label htmlFor={item}>{item}</label>
+          </div>
+        ))
+      }
+    </div>
+  }
+
+  const Checkbox: FC<CheckboxProps<T>> = ({name, items}) => {
+    const field = getField(fields, name, undefined)
+    if (!field) return <></>
+    return <div ref={field.ref} id={`root--checkboxes-${name}`}>
+    {
+
+      items.map(item => (
+        <div key={item}>
+          <input  type="checkbox" id={item} name={name.toString()} value={item} defaultChecked={Array.isArray(field.value) ? field.value.includes(item) : field.value === item ? true : false}  />
+          <label htmlFor={item}>{item}</label>
+        </div>
+      ))
+    }
+  </div>
+  }
+
+
+
 
    function useFieldGroup <U>(groupName: string) {
 
@@ -45,14 +82,31 @@ export default function useForm<T extends Reform<T>>(form: T) {
       {
         items.map(item => <option key={item} value={item}>{item}</option>)
       }
-    </select>
+      </select>
+    }
+
+
+    const CheckboxGroup: FC<CheckboxGroupProps<U>> = ({name, items}) => {
+      const field = getField(fields, name, groupName)
+      if (!field) return <></>
+      return <div ref={field.ref} id={`${groupName}-checkboxes-${name}`}>
+        {
+  
+          items.map(item => (
+            <div key={item}>
+              <input  type="checkbox" id={item} name={name.toString()} value={item} defaultChecked={Array.isArray(field.value) ? field.value.includes(item) : field.value === item ? true : false}  />
+              <label htmlFor={item}>{item}</label>
+            </div>
+          ))
+        }
+      </div>
     }
     
 
 
-    return {InputGroup, SelectGroup}
+    return {InputGroup, SelectGroup,CheckboxGroup }
   }
 
 
-  return {Form, Input,Select,useFieldGroup}
+  return {Form, Input,Select,Radio, Checkbox,useFieldGroup}
 }

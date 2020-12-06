@@ -4,8 +4,8 @@ import useForm  from "./hooks/useForm";
 
 
 const form: Form = {
-  name: "My-Name",
-  surname: "",
+  name: "Hamza",
+  surname: "Khattabi",
   address: {
     street: {
       name: "my-street",
@@ -15,7 +15,7 @@ const form: Form = {
   },
   order: {
     product: {
-      name: "my-product",
+      name: "My-product",
       price: 90,
     }
   }
@@ -38,14 +38,14 @@ interface Order {
   product: Product
 }
 interface Product {
-  name: string,
+  name: string[] | string,
   price: number
 }
 
 
 export default function App() {
-  const {Form, Input, Select, useFieldGroup} = useForm(form)
-  const {InputGroup, SelectGroup} = useFieldGroup<Product>("product")
+  const {Form, Select, Checkbox, useFieldGroup} = useForm(form)
+  const {SelectGroup, CheckboxGroup} = useFieldGroup<Product>("product")
   
 
   const onSubmit = (data: any) => {
@@ -54,9 +54,9 @@ export default function App() {
 
   return (
     <Form onSubmit={onSubmit} style={formStyle}>
-      <Input name="name" placeholder={form.name} />
-      <Select name="surname" placeholder="surname" items={["Khattabi", "Ben Haddou", "Chillah"]} />
-      <InputGroup name="name" placeholder={form.order.product.name} />
+      <Select name="name" placeholder="name" items={["Hamza", "Younes", "Soufiane"]} />
+      <Checkbox name="surname" items={["Khattabi", "Chillah", "Ben Haddou"]} />
+      <CheckboxGroup name="name" items={["My-product","Iphone 12 mini", "Iphone 12", "Iphone 12 Pro", "Iphone 12 PRO MAX" ]} />
       <SelectGroup name="price" placeholder="price" items={["100€", "200€", 300]}  />
       <button type="submit">validate</button>
     </Form>
